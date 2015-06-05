@@ -1,0 +1,10 @@
+browser,Chrome
+domain,google.com
+server,www
+screenshots,./IMAGES/new_images
+saucelabskey,put_saucelabs_key_here
+perceptualdiff,put_directory_to_pdiff_here
+waittime,30
+baselinedir,./IMAGES/baseline_images
+savecomparisonsdir,./IMAGES/comparison_images
+comparefiles,YES

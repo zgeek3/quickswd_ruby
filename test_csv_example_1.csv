@@ -1,0 +1,9 @@
+NAME,EXAMPLE_CSV_test
+PRINT,"THIS IS AN EXAMPLE TEST"
+openpage,"https://www.google.com/"
+entertext,"id","lst-ib","selenium webdriver"
+click,"text","Selenium - Web Browser Automation"
+clickthis,"css","div#header > ul > li","0"
+hover,"text","License"
+PRINT,"Next line is intentional failure"
+click,"text","Licens"
