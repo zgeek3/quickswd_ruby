@@ -18,19 +18,27 @@ def snapit(thingtodo,testname,snap)
 	end
 
 	if snap != "NO"
-	# 	# to avoid confusion the old image and any previous failure will be removed before the new image is created
+	# 	# to avoid confusion the old image and any previous failure  or perfect match will be removed before the new image is created
 	# 	# if snapshots are not taken then the old pictures will be left in place
 		if File.exist?(@configs[3] + '/' + @configs[1] + '_' + testname + '.png')
 			puts "Deleting old screenshot"
 			File.delete(@configs[3] + '/' + @configs[1] + '_' + testname + '.png')
 		end
-		if File.exist?(@configs[7] + '/' + @configs[1] + '_' + testname + '.png')
-			puts "Deleting old comparison"
-			File.delete(@configs[7] + '/' + @configs[1] + '_' + testname + '.png')
-		end
+
 		if File.exist?(@configs[3] + '/' + @configs[1] + '_' + testname + '_FAILURE.png')
 			puts "Deleting old failure screenshot"
 			File.delete(@configs[3] + '/' + @configs[1] + '_' + testname + '_FAILURE.png')
+		end
+
+		if File.exist?(@configs[7] + '/ALL/' + @configs[1] + '_' + testname + '.png')
+			puts "Deleting old comparisons"
+			File.delete(@configs[7] + '/ALL/' + @configs[1] + '_' + testname + '.png')
+			if File.exist?(@configs[7] + '/FAILURES/' + @configs[1] + '_' + testname + '.png')
+				File.delete(@configs[7] + '/FAILURES/' + @configs[1] + '_' + testname + '.png')
+			end
+			if File.exist?(@configs[7] + '/PERFECT_MATCH/' + @configs[1] + '_' + testname + '.png')
+				File.delete(@configs[7] + '/PERFECT_MATCH/' + @configs[1] + '_' + testname + '.png')
+			end
 		end
 	end
 
@@ -62,20 +70,24 @@ def snapit(thingtodo,testname,snap)
 		puts @configs[6] + '/' + filename
 		if File.exist?(@configs[6] + '/' + @configs[1] + '_' + testname + '.png')
 			puts "Baseline image exists:  " + @configs[6] + '/' + @configs[1] + '_' + testname + '.png'
-			system(perceptualdiffc + ' ' + @configs[3] + '/' + filename + ' ' + @configs[6] + '/' + filename + ' -verbose -output ' + @configs[7] + '/' + filename)
-			if File.exist?(@configs[7] + '/' + filename)
-				system('convert ' + @configs[7] + '/' + filename + ' -transparent black ' +  @configs[7] + '/' + filename)
-				system('convert ' + @configs[7] + '/' + filename + ' -alpha set -channel a -evaluate set 50% +channel ' +  @configs[7] + '/' + filename)
-				system('convert ' + @configs[3] + '/' + filename + ' ' + @configs[7] + '/' + filename + ' -flatten ' + @configs[7] + '/' + filename)
+			system(perceptualdiffc + ' ' + @configs[3] + '/' + filename + ' ' + @configs[6] + '/' + filename + ' -verbose -output ' + @configs[7] + '/ALL/' + filename)
+			if File.exist?(@configs[7] + '/ALL/' + filename)
+				system('convert ' + @configs[7] + '/ALL/' + filename + ' -transparent black ' +  @configs[7] + '/ALL/' + filename)
+				system('convert ' + @configs[7] + '/ALL/' + filename + ' -alpha set -channel a -evaluate set 50% +channel ' +  @configs[7] + '/ALL/' + filename)
+				system('convert ' + @configs[3] + '/' + filename + ' ' + @configs[7] + '/ALL/' + filename + ' -flatten ' + @configs[7] + '/ALL/' + filename)
 			end
-			unless File.exist?(@configs[7] + '/' + filename)
+			unless File.exist?(@configs[7] + '/ALL/' + filename)
 				puts "The file doesn't exist so they are a perfect match"
-				system('convert ' + @configs[3] + '/' + filename + ' ' + 'perfect_match.png' + ' -flatten ' + @configs[7] + '/' + filename)
+				system('convert ' + @configs[3] + '/' + filename + ' ' + 'perfect_match.png' + ' -flatten ' + @configs[7] + '/ALL/' + filename)
+				FileUtils.copy(@configs[7] + '/ALL/' + filename,@configs[7] + '/PERFECT_MATCH/' + filename)
 			end
 		end
 		unless File.exist?(@configs[6] + '/' + @configs[1] + '_' + testname + '.png')
 			puts "Baseline image does not exist:  " + @configs[6] + '/' + @configs[1] + '_' + testname + '.png'	
-			system('convert ' + @configs[3] + '/' + filename + ' ' + 'no_baseline_available.png' + ' -flatten ' + @configs[7] + '/' + filename)	
+			system('convert ' + @configs[3] + '/' + filename + ' ' + 'no_baseline_available.png' + ' -flatten ' + @configs[7] + '/ALL/' + filename)	
+		end
+		if snap == "FAILED"
+			FileUtils.copy(@configs[7] + '/ALL/' + filename,@configs[7] + '/FAILURES/' + filename)
 		end
 	end
 
